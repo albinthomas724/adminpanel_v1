@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Firestore Data</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Custom CSS for image cards */
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.15s ease-in-out;
+        }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
+        .card img {
+            object-fit: cover;
+            height: 200px; /* Adjust image height as needed */
+            width: 100%;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 16px;
+            color: #555; /* Adjust text color */
+        }
+
+        .btn-preview,
+        .btn-add-to-cart {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Additional CSS for styling */
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .row {
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h2 class="text-center">Uploaded Images from 'bottle' Folder</h2>
+                <div id="bottleImageList" class="row">
+                    <!-- Image cards from 'bottle' folder will be dynamically added here -->
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h2 class="text-center">Uploaded Images from 'tshirt' Folder</h2>
+                <div id="tshirtImageList" class="row">
+                    <!-- Image cards from 'tshirt' folder will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Firebase and JavaScript code -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import {
+            getStorage,
+            ref,
+            listAll,
+            getDownloadURL
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDYlCSgksz5aGrRd57He-yfuo8zzcog_I",
+            authDomain: "product-40143.firebaseapp.com",
+            projectId: "product-40143",
+            storageBucket: "product-40143.appspot.com",
+            messagingSenderId: "397255272673",
+            appId: "1:397255272673:web:829df4d68ea98cc7eb2fa0",
+            measurementId: "G-566VGYNG2K"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app); // Initialize Firestore
+        const storage = getStorage(app);
+
+        // Function to fetch document data from Firestore
+        async function fetchProductDetails(docId) {
+            try {
+                const docRef = doc(db, 'productprice', docId); // 'datastorage' is your collection name
+                const docSnapshot = await getDoc(docRef);
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    return { name: data.name, price: data.price };
+                } else {
+                    console.log(`Document ${docId} does not exist.`);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`Error getting document ${docId}:`, error);
+                return null;
+            }
+        }
+
+        // Function to check if an image exists in the 'bottle' folder
+        async function checkIfImageExistsInBottle(imageFileName) {
+            try {
+                const imageRef= ref(storage, 'bottle/' + imageFileName);
+                await getDownloadURL(imageRef); // This will throw an error if the image does not exist
+                return true;
+            } catch (error) {
+                console.error(`Error checking image '${imageFileName}' in /bottle folder.`, error);
+                return false;
+            }
+        }
+
+        // Function to check if an image exists in the 'tshirt' folder
+        async function checkIfImageExistsInTshirt(imageFileName) {
+            try {
+                const imageRef = ref(storage, 'tshirt/' + imageFileName);
+                await getDownloadURL(imageRef); // This will throw an error if the image does not exist
+                return true;
+            } catch (error) {
+                console.error(`Error checking image '${imageFileName}' in /tshirt folder.`, error);
+                return false;
+            }
+        }
+
+        // Function to display image in a card with additional info
+        async function displayImageInCard(imageRef, name, price, containerId) {
+            const imageUrl = await getDownloadURL(imageRef);
+            const container = document.getElementById(containerId);
+            const col = document.createElement('div');
+            col.classList.add('col-md-4'); // Adjust column size based on Bootstrap grid system
+
+            const card = document.createElement('div');
+            card.classList.add('card');
+
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = name;
+            card.appendChild(img);
+
+            const cardBody = document.createElement('div');
+            cardBody.classList.add('card-body');
+
+            const cardTitle = document.createElement('h5');
+            cardTitle.classList.add('card-title');
+            cardTitle.textContent = name;
+            cardBody.appendChild(cardTitle);
+
+            const cardText = document.createElement('p');
+            cardText.classList.add('card-text');
+            cardText.textContent = `Price: ${price}`;
+            cardBody.appendChild(cardText);
+
+            // Preview button (optional)
+            const btnPreview = document.createElement('button');
+            btnPreview.classList.add('btn', 'btn-primary', 'btn-preview');
+            btnPreview.textContent = 'Preview';
+            btnPreview.addEventListener('click', () => {
+                alert(`Preview ${name}`);
+            });
+            cardBody.appendChild(btnPreview);
+
+            // Add to cart button (optional)
+            const btnAddToCart = document.createElement('button');
+            btnAddToCart.classList.add('btn', 'btn-success', 'btn-add-to-cart');
+            btnAddToCart.textContent = 'Add to Cart';
+            btnAddToCart.addEventListener('click', () => {
+                alert(`Added ${name} to cart`);
+            });
+            cardBody.appendChild(btnAddToCart);
+
+            card.appendChild(cardBody);
+            col.appendChild(card);
+            container.appendChild(col);
+        }
+
+        // Function to process images in 'Admin' folder and display them with details
+        async function processAdminImages() {
+            try {
+                const folderRef = ref(storage, 'Admin/');
+                const listResult = await listAll(folderRef);
+
+                for (const itemRef of listResult.items) {
+                    const imageName = itemRef.name;
+                    let existsInBottle = await checkIfImageExistsInBottle(imageName);
+                    let existsInTshirt = false;
+
+                    if (!existsInBottle) {
+                        existsInTshirt = await checkIfImageExistsInTshirt(imageName);
+                    }
+
+                    if (existsInBottle || existsInTshirt) {
+                        let adminDocId = existsInBottle? 'vqs7F71mFf5VTs9bf4LL' : 'AiOyMvWOKvwwjo7CjITg';
+                        const productDetails = await fetchProductDetails(adminDocId);
+                        if (productDetails) {
+                            const containerId = existsInBottle? 'bottleImageList' : 'tshirtImageList';
+                            await displayImageInCard(itemRef, imageName, productDetails.price, containerId);
+                        } else {
+                            console.log(`Product details not found for ${imageName}`);
+                        }
+                    } else {
+                        console.log(`Image '${imageName}' does not exist in /bottle or /tshirt folder.`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing images:', error);
+            }
+        }
+
+        // Call function to process images from'Admin' folder
+        processAdminImages();
+    </script>
+</body>
+</html>

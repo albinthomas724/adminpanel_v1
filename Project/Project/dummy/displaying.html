@@ -1,0 +1,146 @@
+<!--CODE EDITED TO STORE IMAGE IN MULTIPLE FOLDER AND DISPLAY IN THE HTML PAGE-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <title>Document</title>
+  </head>
+  <body>
+      <label>Image name</label>   <input type="text" id="ath-namebox" /> 
+    <label id="ath-extlab"></label><br /><br />
+      <img id="ath-myimg" /><label id="ath-upprogress"></label><br /><br />
+      <button id="ath-selbtn">Select Image</button> 
+    <button id="ath-upbtn">Upload Image</button> 
+    <div id="ath-image-list"></div>
+
+    <script type="module">
+      // Firebase configuration
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL,
+        listAll,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+      const firebaseConfig = {
+        apiKey: "AIzaSyBsECqudQoPZpiX_ouHHCw6Ski-btxLD5M",
+        authDomain: "craftex-89610.firebaseapp.com",
+        projectId: "craftex-89610",
+        storageBucket: "craftex-89610.appspot.com",
+        messagingSenderId: "626193026792",
+        appId: "1:626193026792:web:52de324742fe80ffd6035d",
+        measurementId: "G-EQ05LFVWF5",
+      }; // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const storage = getStorage(app);
+      var files = [];
+      var reader = new FileReader();
+      var namebox = document.getElementById("ath-namebox");
+      var extlab = document.getElementById("ath-extlab");
+      var myimg = document.getElementById("ath-myimg");
+      var proglab = document.getElementById("ath-upprogress");
+      var selBtn = document.getElementById("ath-selbtn");
+      var upBtn = document.getElementById("ath-upbtn");
+      var imageList = document.getElementById("ath-image-list"); // Select Image Button Click Event
+      selBtn.addEventListener("click", function () {
+        var input = document.createElement("input");
+        input.type = "file";
+        input.onchange = (_) => {
+          files = Array.from(input.files);
+          reader.readAsDataURL(files[0]);
+          reader.onload = () => {
+            myimg.src = reader.result;
+          };
+          namebox.value = files[0].name;
+          var arr = namebox.value.split(".");
+          extlab.innerHTML = "Selected file extension: " + arr.pop();
+        };
+        input.click();
+      }); 
+      // Upload Image Button Click Event
+      upBtn.addEventListener("click", function () {
+        if (namebox.value === "") {
+          alert("Please select an image first!");
+        } else {
+          var storageRef = ref(storage, "images/" + namebox.value);
+          var uploadTask = uploadBytesResumable(storageRef, files[0]);
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              var progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              proglab.innerHTML = "Upload is " + progress + "% done";
+            },
+            (error) => {
+              alert("Error uploading file");
+            },
+            () => {
+              getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                alert("File available at " + downloadURL);
+                displayImage(downloadURL, namebox.value);
+              });
+            }
+          );
+        }
+      });
+      
+      upBtn.addEventListener("click", function () {
+        if (namebox.value === "") {
+          alert("Please select an image first!");
+        } else {
+          var storageRef = ref(storage, "Admin/" + namebox.value);
+          var uploadTask = uploadBytesResumable(storageRef, files[0]);
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              var progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              proglab.innerHTML = "Upload is " + progress + "% done";
+            },
+            (error) => {
+              alert("Error uploading file");
+            },
+            // () => {
+            //   getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            //     alert("File available at " + downloadURL);
+            //     displayImage(downloadURL, namebox.value);
+            //   });
+            // }
+          );
+        }
+      });
+      // Function to display images
+      function displayImage(url, name) {
+        var img = document.createElement("img");
+        img.src = url;
+        img.alt = name;
+        img.width = 500; // Adjust size as needed
+        imageList.appendChild(img);
+      } // Function to list all images
+      function listAllImages() {
+        var listRef = ref(storage, "images/");
+        listAll(listRef)
+          .then((res) => {
+            res.items.forEach((itemRef) => {
+              getDownloadURL(itemRef).then((url) => {
+                displayImage(url, itemRef.name);
+              });
+            });
+          })
+          .catch((error) => {
+            console.log("Error listing images: ", error);
+          });
+      } // Call listAllImages on page load
+      listAllImages();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple HTML Form</title>
+    <!-- <style>
+        #image-container {
+          width: 200px;
+          height: 300px;
+          overflow: auto; /* add this to enable scrolling if images exceed the container size */
+        }
+      </style> -->
+      <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h2>Simple HTML Form</h2>
+    <form action="/submit-form" method="post" id="form1">
+        <label for="unique-id">Unique ID:</label><br>
+        <input type="text" id="unique-id" name="unique-id" required><br><br>
+        
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="message">Message:</label><br>
+        <textarea id="message" name="message" rows="4" cols="50" required></textarea><br><br>
+        
+        <input type="submit" value="Submit">
+    </form>
+
+    <button id="display-data">Display Data</button>
+    <input type="text" id="update-id" placeholder="Enter unique ID to update">
+    <button id="update-data">Update Data</button>
+
+    <div id="display-container"></div>
+
+    <form id="image-form" action="" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*">
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <button id="display-images">Display All Images</button>
+
+    <div id="image-container"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.14.1/firebase-database.js"></script>
+    <script src="script.js"></script>
+
+    <script src="image.js" type="module"></script>
+  
+
+   
+</body>
+</html>

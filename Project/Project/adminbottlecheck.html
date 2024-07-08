@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+<script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref, listAll, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "product-40143.firebaseapp.com",
+        projectId: "product-40143",
+        storageBucket: "product-40143.appspot.com",
+        messagingSenderId: "397255272673",
+        appId: "1:397255272673:web:829df4d68ea98cc7eb2fa0",
+        measurementId: "G-566VGYNG2K"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    function checkIfImageExistsInAdmin(imageFileName) {
+        const imageRef = ref(storage, 'Admin/' + imageFileName);
+
+        return getDownloadURL(imageRef).then(url => ({ exists: true, url })).catch(() => ({ exists: false }));
+    }
+
+    // Function to display image with additional info
+    function displayImageWithInfo(imageUrl, priceInfo) {
+        const imageElement = document.createElement('img');
+        imageElement.src = imageUrl;
+        imageElement.style.maxWidth = '100%'; // Adjust styling as needed
+        document.body.appendChild(imageElement); // Append the image to the body or another container
+        
+        const priceElement = document.createElement('p');
+        priceElement.textContent = `Price: ${priceInfo}`;
+        document.body.appendChild(priceElement);
+    }
+
+    // Function to process all images in the 'bottle' folder
+    function processBottleImages() {
+        const bottleFolderRef = ref(storage, 'bottle');
+
+        listAll(bottleFolderRef).then(listResult => {
+            listResult.items.forEach(itemRef => {
+                const imageName = itemRef.name;
+
+                checkIfImageExistsInAdmin(imageName).then(result => {
+                    if (result.exists) {
+                        console.log(`Image '${imageName}' exists in /Admin folder.`);
+                        // Display the image from /bottle folder
+                        displayImageWithInfo(result.url, '800');
+                    } else {
+                        console.log(`Image '${imageName}' does not exist in /Admin folder.`);
+                    }
+                }).catch(error => {
+                    console.error('Error checking image in /Admin folder:', error);
+                });
+            });
+        }).catch(error => {
+            console.error('Error listing images in /bottle folder:', error);
+        });
+    }
+
+    // Trigger processing of all images in the 'bottle' folder
+    processBottleImages();
+
+
+
+
+
+
+    // Function to display image with additional info
+    function displayImageWithInfo1(imageUrl, priceInfo) {
+        const imageElement = document.createElement('img');
+        imageElement.src = imageUrl;
+        imageElement.style.maxWidth = '100%'; // Adjust styling as needed
+        document.body.appendChild(imageElement); // Append the image to the body or another container
+        
+        const priceElement = document.createElement('p');
+        priceElement.textContent = `Price: ${priceInfo}`;
+        document.body.appendChild(priceElement);
+    }
+
+    // Function to process all images in the 'bottle' folder
+    function processtshirtImages() {
+        const tshirtFolderRef = ref(storage, 'tshirt');
+
+        listAll(tshirtFolderRef).then(listResult => {
+            listResult.items.forEach(itemRef => {
+                const imageName = itemRef.name;
+
+                checkIfImageExistsInAdmin(imageName).then(result => {
+                    if (result.exists) {
+                        console.log(`Image '${imageName}' exists in /Admin folder.`);
+                        // Display the image from /bottle folder
+                        displayImageWithInfo1(result.url, '600');
+                    } else {
+                        console.log(`Image '${imageName}' does not exist in /Admin folder.`);
+                    }
+                }).catch(error => {
+                    console.error('Error checking image in /Admin folder:', error);
+                });
+            });
+        }).catch(error => {
+            console.error('Error listing images in /bottle folder:', error);
+        });
+    }
+
+    // Trigger processing of all images in the 'bottle' folder
+    processtshirtImages();
+</script>
+
+</body>
+</html>

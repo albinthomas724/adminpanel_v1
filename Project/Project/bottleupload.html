@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload and Display Images</title>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    
+    <input type="file" id="fileUpload" accept="image/*">
+    <button id="uploadBtn">Upload Image</button>
+
+    <div id="uploadProgress"></div>
+
+   
+
+    <script type="module">
+          // Firebase configuration
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL,
+        listAll,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+    apiKey: "AIzaSyCDYlCSgksz5aGrRd57He-yfuo8zzcog_I",
+    authDomain: "product-40143.firebaseapp.com",
+    projectId: "product-40143",
+    storageBucket: "product-40143.appspot.com",
+    messagingSenderId: "397255272673",
+    appId: "1:397255272673:web:829df4d68ea98cc7eb2fa0",
+    measurementId: "G-566VGYNG2K"
+  };
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const storage = getStorage(app);
+
+        const fileUpload = document.getElementById('fileUpload');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+
+        uploadBtn.addEventListener('click', () => {
+            const file = fileUpload.files[0];
+            if (file) {
+                const storageRef = ref(storage, 'bottle/' + file.name);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        uploadProgress.innerText = `Upload progress: ${progress.toFixed(2)}%`;
+                    },
+                    (error) => {
+                        console.error('Error uploading file:', error);
+                    },
+                    () => {
+                        // Upload completed successfully, now get the download URL
+                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                            console.log('File available at', downloadURL);
+                            // Redirect to list.html with download URL
+                            window.location.href = `list.html?imageURL=${encodeURIComponent(downloadURL)}`;
+                        });
+                    }
+                );
+            } else {
+                alert('Please select a file to upload');
+            }
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            const file = fileUpload.files[0];
+            if (file) {
+                const storageRef = ref(storage, 'Admin/' + file.name);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        uploadProgress.innerText = `Upload progress: ${progress.toFixed(2)}%`;
+                    },
+                    (error) => {
+                        console.error('Error uploading file:', error);
+                    },
+                    () => {
+                        // Upload completed successfully, now get the download URL
+                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                            console.log('File available at', downloadURL);
+                            // Redirect to list.html with download URL
+                            window.location.href = `list.html?imageURL=${encodeURIComponent(downloadURL)}`;
+                        });
+                    }
+                );
+            } else {
+                alert('Please select a file to upload');
+            }
+        });
+    </script>
+</body>
+</html>

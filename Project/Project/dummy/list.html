@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Uploaded Images</title>
+</head>
+<body>
+    <h1>Uploaded Images</h1>
+    
+    <div id="imageList"></div>
+
+    <script type="module">
+           // Firebase configuration
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+      import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL,
+        listAll,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+    apiKey: "AIzaSyCDYlCSgksz5aGrRd57He-yfuo8zzcog_I",
+    authDomain: "product-40143.firebaseapp.com",
+    projectId: "product-40143",
+    storageBucket: "product-40143.appspot.com",
+    messagingSenderId: "397255272673",
+    appId: "1:397255272673:web:829df4d68ea98cc7eb2fa0",
+    measurementId: "G-566VGYNG2K"
+  };
+
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const storage = getStorage(app);
+
+        const imageList = document.getElementById('imageList');
+
+        // Function to display images
+        function displayImage(url, name) {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = name;
+          img.width = 300; // Adjust size as needed
+          imageList.appendChild(img);
+        }
+
+        // Function to list all images
+        function listAllImages() {
+          const listRef = ref(storage, 'images/');
+          listAll(listRef)
+            .then((res) => {
+              res.items.forEach((itemRef) => {
+                getDownloadURL(itemRef).then((url) => {
+                  displayImage(url, itemRef.name);
+                });
+              });
+            })
+            .catch((error) => {
+              console.log('Error listing images: ', error);
+            });
+        }
+
+        // Call listAllImages on page load
+        listAllImages();
+    </script>
+</body>
+</html>

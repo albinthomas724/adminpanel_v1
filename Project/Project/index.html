@@ -1,0 +1,159 @@
+
+<!--CODE TO DISPLAY ITEM PRICE LIST AND IMAGES (MERGE)-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody id="ath-tbody"></tbody>
+      </table>
+
+      <h1>Uploaded Images</h1>
+    
+    <div id="imageList"></div>
+    </div>
+
+    <script type="module">
+      // Import Firebase modules
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+      import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+            // Firebase configuration
+     import {
+        getStorage,
+        ref,
+        uploadBytesResumable,
+        getDownloadURL,
+        listAll,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+     
+  
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCDYlCSgksz5aGrRd57He-yfuo8zzcog_I",
+    authDomain: "product-40143.firebaseapp.com",
+    projectId: "product-40143",
+    storageBucket: "product-40143.appspot.com",
+    messagingSenderId: "397255272673",
+    appId: "1:397255272673:web:829df4d68ea98cc7eb2fa0",
+    measurementId: "G-566VGYNG2K"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+  
+        const storage = getStorage(app);
+
+      const db = getFirestore(app); // Initialize Firestore
+
+      // Function to get data from Firestore
+      function GetAllDataOnce() {
+        getDocs(collection(db, "productprice"))
+          .then((querySnapshot) => {
+            var items = [];
+            querySnapshot.forEach((doc) => {
+              items.push(doc.data());
+            });
+            // console.log(items);
+            AddAllItemsToTheTable(items);
+          })
+          .catch((error) => {
+            console.error("Error getting documents: ", error);
+          });
+      }
+
+      // Function to listen for real-time data changes
+      function GetALLDataRealTime() {
+        db.collection("productprice").onSnapshot((querySnapshot) => {
+          var items = [];
+          querySnapshot.forEach((doc) => {
+            items.push(doc.data());
+          });
+          AddAllItemsToTheTable(items);
+          console.log(productprice.AiOyMvWOKvwwjo7CjITg);
+        });
+      }
+
+      // Add items to the table
+      var itemno = 0;
+      var tbody = document.getElementById("ath-tbody");
+
+      function AddItemToTable(name, price) {
+        var trow = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var td2 = document.createElement("td");
+        var td3 = document.createElement("td");
+
+        td1.innerHTML = ++itemno;
+        td2.innerHTML = name;
+        td3.innerHTML = price;
+
+        trow.appendChild(td1);
+        trow.appendChild(td2);
+        trow.appendChild(td3);
+        tbody.appendChild(trow);
+      }
+
+      function AddAllItemsToTheTable(itemlist) {
+        itemno = 0;
+        tbody.innerHTML = "";
+        itemlist.forEach((element) => {
+          AddItemToTable(element.name, element.price);
+        });
+      }
+
+      window.onload = GetAllDataOnce; // Call once when the page loads
+
+      // Optionally, if you want real-time updates, uncomment the line below
+      // GetALLDataRealTime();
+
+
+
+      const imageList = document.getElementById('imageList');
+
+// Function to display images
+function displayImage(url, name) {
+  const img = document.createElement('img');
+  img.src = url;
+  img.alt = name;
+  img.width = 300; // Adjust size as needed
+  imageList.appendChild(img);
+}
+
+// Function to list all images
+function listAllImages() {
+  const listRef = ref(storage, 'Admin/');
+  listAll(listRef)
+    .then((res) => {
+      res.items.forEach((itemRef) => {
+        getDownloadURL(itemRef).then((url) => {
+          displayImage(url, itemRef.name);
+        });
+      });
+    })
+    .catch((error) => {
+      console.log('Error listing images: ', error);
+    });
+}
+
+// Call listAllImages on page load
+listAllImages();
+    </script>
+  </body>
+</html>

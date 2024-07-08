@@ -1,0 +1,107 @@
+
+//CODE TO AUTO Create FOLDER IN STORAGE WHEN LOGIN USING USERNAME
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Folder in Firebase Storage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create Folder in Firebase Storage</h1>
+    <form id="createFolderForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <button type="submit">Create Folder</button>
+    </form>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.12.1/firebase-app.js";
+        import { getStorage, ref, getMetadata, uploadString } from "https://www.gstatic.com/firebasejs/9.12.1/firebase-storage.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCDYlCSgksz5aGrRd57He-yfuo8zzcog_I",
+            authDomain: "product-40143.firebaseapp.com",
+            projectId: "product-40143",
+            storageBucket: "product-40143.appspot.com",
+            messagingSenderId: "397255272673",
+            appId: "1:397255272673:web:829df4d68ea98cc7eb2fa0",
+            measurementId: "G-566VGYNG2K"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+
+        document.getElementById('createFolderForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Please provide both username and password.');
+                return;
+            }
+
+            const folderName = username.toLowerCase(); // Use username as folder name (convert to lowercase for consistency)
+
+            const storageRef = ref(storage);
+            const folderRef = ref(storage, folderName);
+
+            try {
+                const folderMetadata = await getMetadata(folderRef);
+                alert(`Folder "${folderName}" already exists.`);
+            } catch (error) {
+                if (error.code === 'storage/object-not-found') {
+                    // Create the folder
+                    const fileRef = ref(storage, `${folderName}/.keep`);
+                    await uploadString(fileRef, '');
+                    alert(`Folder "${folderName}" created successfully.`);
+                } else {
+                    console.error('Error checking folder existence:', error);
+                    alert('Error checking folder existence: ' + error.message);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
