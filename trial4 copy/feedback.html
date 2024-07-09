@@ -1,0 +1,195 @@
+[10:21] Athira R Krishnan
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Feedback Details</title>
+
+    <style>
+
+        table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+        }
+ 
+        table, th, td {
+
+            border: 1px solid black;
+
+        }
+ 
+        th, td {
+
+            padding: 8px;
+
+            text-align: left;
+
+        }
+ 
+        th {
+
+            background-color: #f2f2f2;
+
+        }
+ 
+        .thank-you-message {
+
+            color: green;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Feedback Details</h1>
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Username</th>
+
+                <th>Rating</th>
+
+                <th>Comment</th>
+
+                <th>Date & Time</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody id="feedback-table-body">
+
+            <!-- Feedback entries will be inserted here -->
+
+        </tbody>
+
+    </table>
+ 
+    <script type="module">
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+        import { getDatabase, ref as dbRef, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+ 
+        // Your Firebase configuration
+
+        const firebaseConfig = {
+
+            apiKey: "AIzaSyDczLLPnaREY3SahAMeKJ-DOMyVENmWwLk",
+
+            authDomain: "crex-f9f68.firebaseapp.com",
+
+            databaseURL: "https://crex-f9f68-default-rtdb.firebaseio.com",
+
+            projectId: "crex-f9f68",
+
+            storageBucket: "crex-f9f68.appspot.com",
+
+            messagingSenderId: "209664661907",
+
+            appId: "1:209664661907:web:933435dab65ebb20913066"
+
+        };
+ 
+        // Initialize Firebase
+
+        const app = initializeApp(firebaseConfig);
+
+        const analytics = getAnalytics(app);
+
+        const database = getDatabase(app);
+ 
+        // Reference to the feedback node
+
+        const feedbackRef = dbRef(database, 'crex/feedback');
+ 
+        // Function to format the timestamp to date and time
+
+        function formatDateTime(timestamp) {
+
+            const date = new Date(timestamp);
+
+            const formattedDate = date.toLocaleDateString(); // Get only the date part
+
+            const formattedTime = date.toLocaleTimeString(); // Get only the time part
+
+            return `${formattedDate} ${formattedTime}`;
+
+        }
+ 
+        // Function to fetch and display feedback details
+
+        function fetchFeedbackDetails() {
+
+            onValue(feedbackRef, (snapshot) => {
+
+                const feedbackTableBody = document.getElementById('feedback-table-body');
+
+                feedbackTableBody.innerHTML = ''; // Clear the table body
+ 
+                snapshot.forEach(userFeedback => {
+
+                    const username = userFeedback.key;
+ 
+                    userFeedback.forEach(feedbackEntry => {
+
+                        const feedback = feedbackEntry.val();
+
+                        const row = feedbackTableBody.insertRow();
+ 
+                        const cellUsername = row.insertCell(0);
+
+                        const cellRating = row.insertCell(1);
+
+                        const cellComment = row.insertCell(2);
+
+                        const cellTimestamp = row.insertCell(3);
+ 
+                        cellUsername.textContent = username;
+
+                        cellRating.textContent = feedback.rating;
+
+                        cellComment.textContent = feedback.comment;
+
+                        cellTimestamp.textContent = formatDateTime(feedback.timestamp);
+
+                    });
+
+                });
+
+            }, (error) => {
+
+                console.error('Error fetching feedback details:', error);
+
+            });
+
+        }
+ 
+        // Fetch feedback details on page load
+
+        fetchFeedbackDetails();
+
+    </script>
+
+</body>
+
+</html>
+ 
